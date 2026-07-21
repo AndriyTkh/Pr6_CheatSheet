@@ -1,0 +1,17 @@
+# Normalize line endings to LF in the repo, regardless of OS.
+# Prevents CRLF/LF churn from turning every line into a phantom merge conflict.
+* text=auto eol=lf
+
+# Explicit for the docs everyone edits.
+*.md   text eol=lf
+*.sql  text eol=lf
+*.py   text eol=lf
+*.ts   text eol=lf
+*.tsx  text eol=lf
+*.json text eol=lf
+
+# Binary assets — never touched by merge/diff.
+*.png  binary
+*.jpg  binary
+*.pptx binary
+*.pdf  binary
