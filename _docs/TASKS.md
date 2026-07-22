@@ -44,7 +44,7 @@ Mandate: you don't write product code. You keep the other four unblocked — rea
 ### Week 1 (2026-07-22 – 2026-07-28)
 
 - **Task: Run kickoff decisions to closure**
-  - **Status:** `WIP` @marina
+  - **Status:** `DONE` @marina
   - **Target date:** `2026-07-22`
   - Description: Drive the 7 decisions owner-brief §12 requires before the team splits up: who owns which stream, when Oksana picks company X and is available for the first workflow session, what the row v0 unit is (ARCHITECTURE.md now **locks** it — "one Prozorro tender *lot*", §16 #3, rev. 3's change from the earlier tender-package grain — get it confirmed against real data, not just accepted on paper), which P0 recipe ships first (ARCHITECTURE.md §6 now flags **Structured Extract** as the pilot-priority candidate — confirm or override), where the backlog lives and who makes product calls, what access/keys/quotas already exist vs. are missing, and what one-lot-row end-to-end result the team commits to showing at the end of week 1.
   - Inputs: owner-brief §12, the team itself.
