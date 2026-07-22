@@ -52,7 +52,7 @@ Pr6_CheatSheet/
 ├── .editorconfig / .gitattributes # LF + no-reflow — kill phantom merge conflicts
 └── _docs/
     ├── ARCHITECTURE.md               # the technical contract (all §N point here)
-    ├── TASKS.md                   # role-owned 6-week plan + live progress tracking
+    ├── TASKS.md                   # role-owned 4-week (+buffer) plan + live progress tracking
     ├── tech-stack-decision.md
     ├── repo-structure.md          # this file
     ├── migrations/0001_core_schema.sql   # §2 locked schema
