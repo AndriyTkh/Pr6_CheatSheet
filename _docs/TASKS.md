@@ -44,7 +44,7 @@ Mandate: you don't write product code. You keep the other four unblocked — rea
 ### Week 1 (2026-07-22 – 2026-07-28)
 
 - **Task: Run kickoff decisions to closure**
-  - **Status:** `TODO`
+  - **Status:** `WIP` @marina
   - **Target date:** `2026-07-22`
   - Description: Drive the 7 decisions owner-brief §12 requires before the team splits up: who owns which stream, when Oksana picks company X and is available for the first workflow session, what the row v0 unit is (ARCHITECTURE.md now **locks** it — "one Prozorro tender *lot*", §16 #3, rev. 3's change from the earlier tender-package grain — get it confirmed against real data, not just accepted on paper), which P0 recipe ships first (ARCHITECTURE.md §6 now flags **Structured Extract** as the pilot-priority candidate — confirm or override), where the backlog lives and who makes product calls, what access/keys/quotas already exist vs. are missing, and what one-lot-row end-to-end result the team commits to showing at the end of week 1.
   - Inputs: owner-brief §12, the team itself.
@@ -53,7 +53,7 @@ Mandate: you don't write product code. You keep the other four unblocked — rea
   - Reference: [owner-brief §12]; §16 #3, §6.
 
 - **Task: Build the access/dependency register**
-  - **Status:** `TODO`
+  - **Status:** `WIP` @marina
   - **Target date:** `2026-07-23`
   - Description: One document listing every external dependency the pilot touches: Prozorro API (public, no auth), YouControl API key + which licensed modules it actually covers (registry vs. metered add-ons — "having a key ≠ having all modules," §6a), OpenRouter key, Cloudflare R2 bucket/credentials, Railway project access, Google account(s) for Sheets/Docs export. For each: who holds it, where it's stored (never in the repo or client), what's still missing.
   - Inputs: whatever keys the team already has (owner-brief §10 notes YouControl's key already exists).
@@ -62,7 +62,7 @@ Mandate: you don't write product code. You keep the other four unblocked — rea
   - Reference: §6a, §11; [owner-brief §10, §12.6, §15 "API й ключі"].
 
 - **Task: Hand off secrets server-side only**
-  - **Status:** `TODO`
+  - **Status:** `DONE` @marina
   - **Target date:** `2026-07-24`
   - Description: Get the YouControl key (and any other provider keys) to the backend developer through a private channel, never committed or pasted into shared docs/chat history that persists in the repo. Confirm with backend dev that the key lands behind one server-side proxy endpoint, not in frontend code or logs.
   - Inputs: keys from the dependency register.
@@ -71,7 +71,7 @@ Mandate: you don't write product code. You keep the other four unblocked — rea
   - Reference: §11 "Secrets server-side only."
 
 - **Task: Draft legal/compliance guardrails**
-  - **Status:** `TODO`
+  - **Status:** `WIP` @marina
   - **Target date:** `2026-07-23`
   - Description: Write the operating rules for what counts as "public data" for this pilot, what "external_ok" attestation means in practice for a manually-uploaded file (§11), and what Ukrainian personal-data-handling considerations apply to company officer/beneficiary data pulled from YouControl (names, addresses, EDRPOU) even though the source registry itself is public. This is the checklist backend/DS devs test against, not a legal memo nobody reads.
   - Inputs: ARCHITECTURE.md §11 (external_ok gate), owner-brief §10 ("Дані").
@@ -80,7 +80,7 @@ Mandate: you don't write product code. You keep the other four unblocked — rea
   - Reference: §11; [owner-brief §10].
 
 - **Task: Run Oksana's first workflow session**
-  - **Status:** `TODO`
+  - **Status:** `DONE` @marina — notes: [Excalidraw workflow](https://link.excalidraw.com/l/5iKoSi2GiB4/91hpw3JuCS)
   - **Target date:** `2026-07-25`
   - Description: Schedule and sit in on Oksana walking through her *manual* process for the company-X case — this defines what a "logical row" needs to contain, what fields matter, and what failure states actually happen in practice (not just the ones in the doc). Capture it in writing/recording.
   - Inputs: Oksana's availability, company X chosen (may happen in this same session).
