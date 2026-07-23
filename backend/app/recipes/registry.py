@@ -1,0 +1,64 @@
+"""Recipe class → the `recipe` table row that `column`/`run` FK against.
+
+A recipe's Python identity is a slug (`prozorro_lots`); the schema's identity is
+`(uuid, version)`. `uuid5` over a fixed namespace bridges the two deterministically
+— the same slug is the same uuid in every environment, so a column written in dev
+still points at the right recipe row after a fresh migrate (§3, §10).
+"""
+
+from __future__ import annotations
+
+import uuid
+
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.models import Recipe as RecipeRow
+from app.recipes.base import Recipe
+
+#: Fixed — changing it re-identifies every shipped recipe. Don't.
+RECIPE_NAMESPACE = uuid.UUID("6f9b3a1e-0c4d-5e2a-9b7f-1d3c5a7e9b11")
+
+
+def recipe_uuid(recipe_id: str) -> uuid.UUID:
+    return uuid.uuid5(RECIPE_NAMESPACE, recipe_id)
+
+
+async def ensure_registered(
+    session: AsyncSession, recipe: type[Recipe] | Recipe
+) -> RecipeRow:
+    """Insert this recipe version if the catalog doesn't have it yet.
+
+    Never *updates* an existing `(id, version)` — a shipped version is immutable
+    (CLAUDE.md §5), so a changed schema means a new `version`, not an edit here.
+    """
+    cls = recipe if isinstance(recipe, type) else type(recipe)
+    rid = recipe_uuid(cls.id)
+    existing = await session.get(RecipeRow, (rid, cls.version))
+    if existing is not None:
+        return existing
+
+    row = RecipeRow(
+        id=rid,
+        version=cls.version,
+        name=cls.name,
+        exec_type=cls.exec_type,
+        shape=cls.shape,
+        volatile=cls.volatile,
+        params_schema=dict(cls.params_schema),
+        output_schema=dict(cls.output_schema),
+        cite_spec=dict(cls.cite_spec),
+        eval_spec=dict(cls.eval_spec),
+    )
+    session.add(row)
+    await session.flush()
+    return row
+
+
+async def get_registered(
+    session: AsyncSession, recipe_id: str, version: int
+) -> RecipeRow | None:
+    stmt = select(RecipeRow).where(
+        RecipeRow.id == recipe_uuid(recipe_id), RecipeRow.version == version
+    )
+    return (await session.execute(stmt)).scalar_one_or_none()
