@@ -2,11 +2,8 @@
 
 Task: `_docs/tasks/role-2.md` week 2, "Wavefront-gated enqueue + `cache_key`
 (depth-aware)" (§4 steps 5–6, §2a).
-Status at handoff: `REVIEW`. Verify green; full suite 132 passed, 0 skipped, 0
-failed against a database carrying both migrations **and** the Procrastinate
-schema (see "Environment" below — on a database without it, `test_queue.py`'s
-end-to-end case fails on the missing `procrastinate_job_to_defer_v1` type, which
-is environment, not code).
+Status at handoff: `REVIEW`. Verify green; full suite **132 passed, 0 skipped, 0
+failed** against the dev `cheatsheet` database.
 
 ## What landed
 
@@ -84,13 +81,23 @@ the end of that job** — the same event, no round trip, no second poller — an
 of terminal statuses ever appears (a backfill script, a manual override route),
 it must call `on_cell_terminal()` too or its dependents will sit `blocked`.
 
+## Resolved on this branch (were open on `role-2/wk2-queue`)
+
+* **`psycopg[binary]` is now declared** — `pyproject.toml` carries
+  `procrastinate[psycopg_binary]` (psycopg 3 is the connector's driver;
+  SQLAlchemy stays on asyncpg). Team-agreed. Run `pip install -e .[dev]` to repair
+  an env that predates it — editing the file does not touch installed packages.
+  Deployment note left in the file: psycopg upstream wants `psycopg[c]` or system
+  libpq rather than the binary wheel for production.
+* **The dev `cheatsheet` database now carries the Procrastinate schema**
+  (`python scripts/apply_queue_schema.py --database-url …/cheatsheet`), so the
+  full suite is green against the same database `backend/CLAUDE.md` walks you
+  into — one `CS_TEST_DATABASE_URL`, no second queue database. The isolated
+  `cheatsheet_queue` database was dropped. Enqueue is transactional with the cell
+  write (§4), so the queue schema belongs *in* the app database, not beside it.
+
 ## Inherited, still unresolved
 
-* **`psycopg[binary]` is installed but undeclared in `pyproject.toml`** (from
-  `role-2/wk2-queue`). Procrastinate's `PsycopgConnector` needs psycopg 3; the
-  package was pip-installed by hand. **A fresh checkout cannot run the queue.**
-  Which form the project wants (`procrastinate[psycopg_binary]` vs. a source
-  build) is a team call, not a coding-agent one. Still open — raise it.
 * **`column_input` records the DAG edge but not which declared `InputSpec` it
   satisfies**, so `_assemble_row_context()` keys `row_context.inputs` on the input
   column's *name* (plus an `output_slot` alias). A journalist renaming a column
@@ -125,12 +132,11 @@ it must call `on_cell_terminal()` too or its dependents will sit `blocked`.
   database: `async_session_factory` and `procrastinate_app` are module-level
   singletons read at import time. Host is `127.0.0.1`, never `localhost`
   (backend/CLAUDE.md).
-* **The full-suite run used the isolated `cheatsheet_queue` database** (both
-  migrations + `scripts/apply_queue_schema.py`), the one `role-2/wk2-queue`
-  created, so Procrastinate's tables stay out of the dev `cheatsheet` database.
-  Against plain `cheatsheet` the suite is 131 passed / 1 failed, the failure
-  being `test_queue.py`'s end-to-end case on the absent queue schema. Whoever
-  merges should decide whether the dev database gets the queue schema or the
-  queue test gets its own URL — it is currently a trap for the next session.
+* **A fresh Postgres needs the queue schema before the full suite is green** —
+  `test_queue.py`'s end-to-end case fails on `type
+  "procrastinate_job_to_defer_v1[]" does not exist` without it. One command, on
+  the *same* database `CS_TEST_DATABASE_URL` points at:
+  `python scripts/apply_queue_schema.py --database-url <that url>` (it is already
+  step in `backend/CLAUDE.md`). Done for the current dev `cheatsheet`.
 * **The untracked `_docs/API.md` in this checkout belongs to
   `role-2/wk2-api-routes`** and was deliberately left uncommitted.

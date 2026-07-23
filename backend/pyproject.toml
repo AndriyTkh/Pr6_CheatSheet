@@ -12,7 +12,13 @@ dependencies = [
     "fastapi-users[sqlalchemy]",
     "httpx",                # connectors (§6a)
     "jsonschema",           # server-side output_schema enforcement (§3)
-    "procrastinate",        # the one queue — Postgres LISTEN/NOTIFY + SKIP LOCKED (§4, §15)
+    # the one queue — Postgres LISTEN/NOTIFY + SKIP LOCKED (§4, §15). The extra is
+    # not optional: PsycopgConnector runs on psycopg 3, which `procrastinate` alone
+    # does not pull, and without it the queue fails at first connect rather than at
+    # import. SQLAlchemy stays on asyncpg — two drivers, on purpose.
+    # `[binary]` is a prebuilt wheel (no libpq/compiler on a dev laptop); psycopg
+    # upstream wants `psycopg[c]` or system libpq for a real deployment.
+    "procrastinate[psycopg_binary]",
     "sse-starlette",        # realtime transport (§4 step 7, §15)
 ]
 
