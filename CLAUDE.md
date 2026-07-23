@@ -3,7 +3,7 @@
 **Read this file at the start of every session (human or coding agent) before touching anything.**
 It is the map. It tells you which doc is the source of truth for what, how to record progress, and the git rules that keep 5 people + coding agents from colliding.
 
-CheatSheet is a **columnar, lineage-tracked compute graph over rows** — a spreadsheet on the surface, a build-system/DAG engine underneath — built as a 6-week pilot over Prozorro + YouControl (see `_docs/ARCHITECTURE.md §0`).
+CheatSheet is a **columnar, lineage-tracked compute graph over rows** — a spreadsheet on the surface, a build-system/DAG engine underneath — built as a pilot over Prozorro + YouControl — 4-week build + 1.5-week buffer, `_docs/ARCHITECTURE.md §14` (see `_docs/ARCHITECTURE.md §0`).
 
 ---
 
