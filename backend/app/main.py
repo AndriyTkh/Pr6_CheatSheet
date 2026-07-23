@@ -1,6 +1,7 @@
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+from fastapi.routing import APIRoute
 
 from app.api.routes import api_router
 from app.dag.errors import EdgeRejected
@@ -17,7 +18,23 @@ async def lifespan(app: FastAPI):
     await engine.dispose()
 
 
-app = FastAPI(title="CheatSheet", version="0.1.0", lifespan=lifespan)
+def operation_id(route: APIRoute) -> str:
+    """The handler's function name, used verbatim as the OpenAPI `operationId`.
+
+    FastAPI's default concatenates path and method, so `openapi-typescript`
+    would emit `list_rows_sheets__sheet_id__rows_get`. The function name is the
+    readable one, and it keeps a path change from renaming a frontend symbol
+    (tech-stack-decision.md, "Shared FE/BE types").
+    """
+    return route.name
+
+
+app = FastAPI(
+    title="CheatSheet",
+    version="0.1.0",
+    lifespan=lifespan,
+    generate_unique_id_function=operation_id,
+)
 app.include_router(api_router)
 
 
