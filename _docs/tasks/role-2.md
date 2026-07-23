@@ -9,7 +9,7 @@ Mandate: the schema is already locked (`_docs/migrations/0001_core_schema.sql`, 
 ### Week 1 (2026-07-22 – 2026-07-28)
 
 - **Task: Mirror the locked schema into SQLAlchemy models — including `0002`**
-  - **Status:** `REVIEW` @andriy role-2/wk1-models-recipe-dag
+  - **Status:** `DONE`
   - **Target date:** `2026-07-22`
   - Description: Write async SQLAlchemy 2.0 models in `backend/app/models/` matching every table/enum in `0001_core_schema.sql` **and `0002_sheets_and_lot_grain.sql`** exactly — `sheet`, `row_link`, the `row.parent_row_id`/`depth`/`ordinal`/`position`/`tender_id`/`lot_id` columns, `column.target_depth`/`item_type`, `column_input.is_required`/`consumes`, and the `NotApplicable` enum value. Land both migrations together — the pilot builds on lot grain + sheets from day one, not as a week-4 retrofit. Do not add fields the migrations don't have; do not edit either migration to match convenient ORM shapes — they're the contract (§2, §2a).
   - Inputs: `_docs/migrations/0001_core_schema.sql`, `_docs/migrations/0002_sheets_and_lot_grain.sql`.
@@ -19,7 +19,7 @@ Mandate: the schema is already locked (`_docs/migrations/0001_core_schema.sql`, 
   - Reference: §2, §2a.
 
 - **Task: Stand up FastAPI app skeleton + core config**
-  - **Status:** `REVIEW` @andriy role-2/wk1-models-recipe-dag — skeleton/config/health done, `test_health.py` written; secret *values* still pending Role 1
+  - **Status:** `DONE`
   - **Target date:** `2026-07-23`
   - Description: `main.py` entrypoint, `core/config.py` for settings (DB URL, OpenRouter key, R2 credentials, YouControl key — all from env, never hardcoded), basic health-check route.
   - Inputs: dependency register (Role 1) for what env vars/secrets to wire in.
@@ -29,7 +29,7 @@ Mandate: the schema is already locked (`_docs/migrations/0001_core_schema.sql`, 
   - Reference: §15.
 
 - **Task: Recipe contract (`recipes/base.py`)**
-  - **Status:** `REVIEW` @andriy role-2/wk1-models-recipe-dag — Role 3/4 can start writing recipes against it
+  - **Status:** `DONE`
   - **Target date:** `2026-07-22`
   - Description: Implement the actual `Recipe` class per §3 — `id/name/version`, `exec_type` (func/agent), `input` (each flagged `required`/`optional` **and** `whole_list`/`per_item`, §2a/§3), `params`/`output` schemas (JSON Schema, enforced server-side per §3's last bullet), `exec()`, `cite`, `eval`. This is the shared contract Role 3/4 build every recipe against — get it stable **before** they start writing recipes in parallel, so prioritize it on day one alongside the models task, not after.
   - Inputs: none.
@@ -39,7 +39,7 @@ Mandate: the schema is already locked (`_docs/migrations/0001_core_schema.sql`, 
   - Reference: §3.
 
 - **Task: Prozorro connector (row-producing, lot grain)**
-  - **Status:** `REVIEW` @andriy role-2/wk1-models-recipe-dag — live tender `59ac5ae6011344c88153399786b0c78e` pulled end to end into 1 lot row
+  - **Status:** `DONE`
   - **Target date:** `2026-07-24`
   - Description: Implement `connectors/prozorro.py` per §6a — `GET /tenders` feed (cursor pagination, sync-by-`dateModified`), `GET /tenders/{id}`, documents list, deterministic winner extraction (`award.status='active'` **and** `award.lotID == lot.id` → `suppliers[].identifier.id`, filtered to `scheme='UA-EDR'` for EDRPOU; non-`UA-EDR` bidders → `NotApplicable`, not `NotFound`, §16 #9), `award.value`. **One row per tender lot** (§16 #3) — a tender with no `lots[]` still yields exactly one row, `lotID = null`. No LLM — this is pure structured extraction. Wire it as the row-producing recipe (`recipes/row_producing/`).
   - Inputs: none (public API, no auth).
@@ -59,7 +59,7 @@ Mandate: the schema is already locked (`_docs/migrations/0001_core_schema.sql`, 
   - Reference: §6a, §11.
 
 - **Task: Minimal DAG engine — cycle check + list gate + topo sort**
-  - **Status:** `REVIEW` @andriy role-2/wk1-models-recipe-dag — plus the §2 invariants 2–4 (`dag/invariants.py`), pulled forward from week 3
+  - **Status:** `DONE`
   - **Target date:** `2026-07-25`
   - Description: `dag/` — cycle detection on `column_input` edge-add (reject edges that close a loop), **the §2a expansion gate** at the same edge-add point (reject a `per_item` input pointed at a `value_type='list'` column, with a message naming the column and the two Expand modes), and topo-sort of the affected subgraph. Both checks are app-side validation on the add-column action — no cell created, nothing enqueued, nothing spent (§4 step 2).
   - Inputs: models task.
@@ -69,7 +69,7 @@ Mandate: the schema is already locked (`_docs/migrations/0001_core_schema.sql`, 
   - Reference: §4 steps 1–3, §2a.
 
 - **Task: Get one recipe through Preview → run → column → Result (week 1 gate)**
-  - **Status:** `REVIEW` @andriy role-2/wk1-models-recipe-dag — recorded run: `scripts/gate_week1.py --tender-id 59ac5ae6011344c88153399786b0c78e` → 1 lot row on the source `@tenders` sheet, 5 cells all `Answered` with citations, winner `31200334`, 785510 UAH, 3 participants; re-run reports "0 created, 1 updated". Suite green: 80 passed, 0 skipped. Gate flip in TASKS.md is the coordinator's.
+  - **Status:** `DONE` — recorded run: `scripts/gate_week1.py --tender-id 59ac5ae6011344c88153399786b0c78e` → 1 lot row on the source `@tenders` sheet, 5 cells all `Answered` with citations, winner `31200334`, 785510 UAH, 3 participants; re-run reports "0 created, 1 updated". Suite green: 87 passed, 0 skipped. Gate flip in TASKS.md is still the coordinator's — this Status is task-complete, not the gate.
   - **Target date:** `2026-07-28`
   - Description: Wire whichever P0 recipe the team picked (kickoff decision, Role 1 — **Structured Extract** is ARCHITECTURE.md's flagged priority candidate, §6) through the full loop on one real lot row: add column → preview → confirm → background run (can be synchronous for week 1, Procrastinate wiring can follow week 2) → cell filled → visible as a Result.
   - Inputs: Prozorro connector, recipe contract, at least a stub grid (Role 5) or direct DB inspection.
