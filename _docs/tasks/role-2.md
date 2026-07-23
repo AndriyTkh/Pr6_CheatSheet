@@ -141,7 +141,7 @@ Mandate: the schema is already locked (`_docs/migrations/0001_core_schema.sql`, 
   - Reference: §15 tech-stack-decision.md "Shared FE/BE types", §2a.
 
 - **Task: Column-dependency support for derived-column inputs**
-  - **Status:** `WIP` role-2/wk2-chained-columns
+  - **Status:** `REVIEW` role-2/wk2-chained-columns
   - **Target date:** `2026-08-03`
   - Description: Recipes must accept already-derived columns as inputs (Summarize/Classify built on top of Web Search output, etc.) — confirm DAG/cache-key handle chained derivation correctly.
   - Inputs: DAG/cache work above.
