@@ -231,8 +231,10 @@ async def _deferred_job_runs_to_terminal() -> None:
             assert cell.status is CellStatus.Answered
             assert cell.value_jsonb == "ran-on-a-worker"
             assert cell.run_id is not None, "§10 — every execution writes a run"
-            # §4 step 6 belongs to the next task; NULL means "not hittable".
-            assert cell.cache_key is None
+            # §4 step 6 now exists, so a successful run is memoized: a key here
+            # means hittable. NULL is reserved for what must never be reused —
+            # engine-side `Error` writes and (§10) fallback-model runs.
+            assert cell.cache_key is not None
             run = (
                 await db.execute(select(Run).where(Run.id == cell.run_id))
             ).scalar_one()
