@@ -5,23 +5,44 @@ Base skeleton, mapped to `ARCHITECTURE.md` components (§1, §15).
 ```
 Pr6_CheatSheet/
 ├── _docs/migrations/
-│   └── 0001_core_schema.sql      # §2 locked schema — frozen contract
+│   ├── 0001_core_schema.sql      # §2 locked schema — frozen contract
+│   └── 0002_sheets_and_lot_grain.sql  # §2a sheets, lot grain, list gate flags
 │
 ├── backend/                      # Python + FastAPI (§15)
-│   ├── pyproject.toml            # 6 deps: fastapi, uvicorn, sqlalchemy, asyncpg, pydantic-settings, fastapi-users
+│   ├── pyproject.toml            # fastapi, uvicorn, sqlalchemy[asyncio], asyncpg,
+│   │                             # pgvector, pydantic-settings, fastapi-users,
+│   │                             # httpx (§6a), jsonschema (§3 output enforcement)
+│   ├── docker-compose.yml        # local Postgres 15 + pgcrypto/vector
+│   ├── scripts/
+│   │   └── apply_migrations.py   # runs 0001 then 0002 against $DATABASE_URL
 │   └── app/
-│       ├── main.py               # FastAPI app entry
-│       ├── core/
-│       │   └── config.py         # pydantic-settings (DB URL, API keys from env)
-│       ├── db/
-│       │   ├── base.py           # DeclarativeBase + TimestampMixin + VersionMixin
-│       │   └── session.py        # Async engine + get_db() dependency
-│       │
-│       ├── models/               # — ORM models mirroring migrations/0001 go here
-│       ├── schemas/              # — Pydantic request/response schemas go here
-│       ├── api/routes/           # — endpoint files go here
-│       ├── recipes/              # — §3/§6 recipe contract + catalog goes here
-│       └── tests/                # — test fixtures go here
+│       ├── main.py               # FastAPI entrypoint
+│       ├── core/config.py        # §15 settings — every secret from env
+│       ├── db/                   # base.py (DeclarativeBase) + session.py (async)
+│       ├── models/               # §2/§2a ORM mirror of 0001+0002 — never the reverse
+│       │   ├── enums.py          # §5 statuses + the terminal/void/needs-human sets
+│       │   ├── types.py          # shared PG enum + uuid_pk column helpers
+│       │   ├── case.py sheet.py column.py cell.py document.py
+│       │   ├── recipe.py         # recipe catalog + §10 run log
+│       │   └── cross_row.py      # §8 signals with no single-row home
+│       ├── dag/                  # §4 — when a cell is ready
+│       │   ├── graph.py          # pure: cycle check, topo sort, up/downstream
+│       │   ├── validation.py     # edge-add gate (§4 step2): cycle + §2a list/grain
+│       │   ├── invariants.py     # §2 app-side invariants 2–4 (sheet/grain/expand)
+│       │   └── errors.py         # journalist-readable rejections
+│       ├── recipes/              # §3 contract + §6 catalog
+│       │   ├── base.py           # Recipe / CellRecipe / RowProducingRecipe / CrossRowRecipe
+│       │   ├── registry.py       # recipe slug ↔ (uuid, version) in the `recipe` table
+│       │   ├── row_producing/    # prozorro_lots.py (§6a) — Expand/Pair builder wk3
+│       │   ├── cell_producing/   # Structured Extract, Summarize, … (Roles 3/4)
+│       │   └── cross_row/        # §8
+│       ├── connectors/           # §6a — prozorro.py; youcontrol.py behind a key proxy
+│       ├── services/             # orchestration the routes/queue call
+│       │   └── row_ingest.py     # row-producing run → rows + cells (week-1 gate)
+│       ├── api/routes/           # §15 — health.py; grid routes wk2
+│       ├── schemas/              # pydantic request/response shapes
+│       └── tests/                # pure tests always run; DB tests skip without
+│                                 # CS_TEST_DATABASE_URL
 │
 ├── frontend/                     # React + TypeScript + Vite (§15)
 │   ├── package.json
@@ -51,21 +72,9 @@ Pr6_CheatSheet/
 
 ## Directories to add later (in order)
 
-| Directory                     | What                                           | When                             |
-| ----------------------------- | ---------------------------------------------- | -------------------------------- |
-| `backend/app/models/`         | ORM models per table                           | First route needs DB queries     |
-| `backend/app/schemas/`        | Pydantic request/response models               | Same time as models              |
-| `backend/app/api/routes/`     | CRUD endpoints (cases, rows, cells, etc.)      | Add route = add file             |
-| `backend/app/recipes/base.py` | Recipe abstract class (§3)                     | Before DS team writes recipes    |
-| `backend/app/dag/`            | Cycle check, topo-sort, wavefront enqueue (§4) | Before any column execution      |
-| `backend/app/tasks/`          | Procrastinate job queue (§4)                   | When background execution starts |
-| `backend/app/connectors/`     | Prozorro + YouControl API clients (§6a)        | When connectors are built        |
-| `backend/app/documents/`      | Docling ingest, OCR, chunking (§7)             | When doc processing starts       |
-| `backend/app/citations/`      | Quote→locate anchoring, fuzzy OCR (§9)         | With documents                   |
-| `backend/app/agents/`         | Bounded agent loops (§8)                       | With agentic recipes             |
-| `backend/app/eval/`           | Per-recipe metrics + cell_feedback (§12)       | With eval tracking               |
-| `backend/app/realtime/`       | SSE streaming, reconcile-on-reconnect (§4)     | When frontend needs live updates |
-| `migrations/`                 | Alembic / numbered migration files             | Only when schema changes         |
+| Directory     | What                               | When                     |
+| ------------- | ---------------------------------- | ------------------------ |
+| `migrations/` | Alembic / numbered migration files | Only when schema changes |
 
 ## Notes
 
