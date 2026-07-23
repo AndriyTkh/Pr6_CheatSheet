@@ -19,7 +19,7 @@ Mandate: the schema is already locked (`_docs/migrations/0001_core_schema.sql`, 
   - Reference: §2, §2a.
 
 - **Task: Stand up FastAPI app skeleton + core config**
-  - **Status:** `REVIEW` @andriy role-2/wk1-models-recipe-dag — skeleton/config/health done; secret *values* still pending Role 1
+  - **Status:** `REVIEW` @andriy role-2/wk1-models-recipe-dag — skeleton/config/health done, `test_health.py` written; secret *values* still pending Role 1
   - **Target date:** `2026-07-23`
   - Description: `main.py` entrypoint, `core/config.py` for settings (DB URL, OpenRouter key, R2 credentials, YouControl key — all from env, never hardcoded), basic health-check route.
   - Inputs: dependency register (Role 1) for what env vars/secrets to wire in.
@@ -39,7 +39,7 @@ Mandate: the schema is already locked (`_docs/migrations/0001_core_schema.sql`, 
   - Reference: §3.
 
 - **Task: Prozorro connector (row-producing, lot grain)**
-  - **Status:** `REVIEW` @andriy role-2/wk1-models-recipe-dag — extraction + persistence tested against a recorded payload; one *live* tender still to pull
+  - **Status:** `REVIEW` @andriy role-2/wk1-models-recipe-dag — live tender `59ac5ae6011344c88153399786b0c78e` pulled end to end into 1 lot row
   - **Target date:** `2026-07-24`
   - Description: Implement `connectors/prozorro.py` per §6a — `GET /tenders` feed (cursor pagination, sync-by-`dateModified`), `GET /tenders/{id}`, documents list, deterministic winner extraction (`award.status='active'` **and** `award.lotID == lot.id` → `suppliers[].identifier.id`, filtered to `scheme='UA-EDR'` for EDRPOU; non-`UA-EDR` bidders → `NotApplicable`, not `NotFound`, §16 #9), `award.value`. **One row per tender lot** (§16 #3) — a tender with no `lots[]` still yields exactly one row, `lotID = null`. No LLM — this is pure structured extraction. Wire it as the row-producing recipe (`recipes/row_producing/`).
   - Inputs: none (public API, no auth).
@@ -69,7 +69,7 @@ Mandate: the schema is already locked (`_docs/migrations/0001_core_schema.sql`, 
   - Reference: §4 steps 1–3, §2a.
 
 - **Task: Get one recipe through Preview → run → column → Result (week 1 gate)**
-  - **Status:** `WIP` @andriy role-2/wk1-models-recipe-dag — `services/row_ingest.py` runs the loop end to end; needs a live Postgres + a real tender to close
+  - **Status:** `REVIEW` @andriy role-2/wk1-models-recipe-dag — recorded run: `scripts/gate_week1.py --tender-id 59ac5ae6011344c88153399786b0c78e` → 1 lot row on the source `@tenders` sheet, 5 cells all `Answered` with citations, winner `31200334`, 785510 UAH, 3 participants; re-run reports "0 created, 1 updated". Suite green: 80 passed, 0 skipped. Gate flip in TASKS.md is the coordinator's.
   - **Target date:** `2026-07-28`
   - Description: Wire whichever P0 recipe the team picked (kickoff decision, Role 1 — **Structured Extract** is ARCHITECTURE.md's flagged priority candidate, §6) through the full loop on one real lot row: add column → preview → confirm → background run (can be synchronous for week 1, Procrastinate wiring can follow week 2) → cell filled → visible as a Result.
   - Inputs: Prozorro connector, recipe contract, at least a stub grid (Role 5) or direct DB inspection.
