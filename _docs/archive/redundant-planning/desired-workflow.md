@@ -1,5 +1,7 @@
 # CheatSheet — Investigation Workflow (Desired UX)
 
+> **Archived source doc — still cited, not still authoritative.** Its content was folded into `_docs/ARCHITECTURE.md` during the rev. 3 workflow-integration pass, which is now the contract. Several `§` sections there still cite this file by section number (`desired-workflow.md §1`–`§7`) for the *scenario* behind a decision — follow those citations here, but where this file and ARCHITECTURE.md disagree, **ARCHITECTURE.md wins**.
+
 From one journalist's question to cited tender columns, verified companies, and reusable relationship tables.
 
 **Scenario used throughout:** Journalist's question: *Which 2026 tenders did KSE enter as a bidder, and which source-backed signals or patterns deserve review?*

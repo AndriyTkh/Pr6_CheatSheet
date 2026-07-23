@@ -1,8 +1,14 @@
-# CheatSheet — Backend / DB Task Plan (Role 2)
+# CheatSheet — Backend / DB Task Plan (Role 2) — ARCHIVED
 
-**This file owns Role 2's task list only.** Split out of `_docs/TASKS.md` to keep that doc from growing unbounded and let Role 2 iterate on their own section without touching lines the other roles edit. Everything else — read order, doc map, progress-tracking convention, weekly gates, other roles' lists, cross-role dependency notes — still lives in `_docs/TASKS.md`; read that first.
+> **⚠️ SUPERSEDED — do not edit, do not read for status. The live Role 2 list is `_docs/tasks/role-2.md`.**
+>
+> This was the first split (Role 2 only, while the other three roles were still inside `_docs/TASKS.md`). The rev. 3 workflow pass finished that split for every role, so this file became a second copy of the same tasks — exactly the two-trackers-out-of-sync problem `CLAUDE.md §3` forbids, and it did drift: the week-1 `Status` lines here were live while `role-2.md` still read `TODO`. Those seven statuses were ported to `_docs/tasks/role-2.md` before this file was archived; task text and target dates were byte-identical.
+>
+> Kept only as history. If you want to know what Role 2 is doing, open `_docs/tasks/role-2.md`.
 
-**Same rules apply here as in `TASKS.md`:** `CLAUDE.md §3` progress-tracking convention (`Status` token per task, edit only your own line), `CLAUDE.md §5` git rules (branch per task, never reflow this doc). `§N` references point to `_docs/ARCHITECTURE.md` unless marked `[owner-brief §N]`.
+**This file owned Role 2's task list only.** Split out of `_docs/TASKS.md` to keep that doc from growing unbounded and let Role 2 iterate on their own section without touching lines the other roles edit. Everything else — read order, doc map, progress-tracking convention, weekly gates, other roles' lists, cross-role dependency notes — lived in `_docs/TASKS.md`.
+
+**Same rules applied here as in `TASKS.md`:** `CLAUDE.md §3` progress-tracking convention (`Status` token per task, edit only your own line), `CLAUDE.md §5` git rules (branch per task, never reflow this doc). `§N` references point to `_docs/ARCHITECTURE.md` unless marked `[owner-brief §N]`.
 
 ---
 

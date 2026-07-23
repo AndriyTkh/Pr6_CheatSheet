@@ -1,10 +1,10 @@
 # CheatSheet — Technical Architecture Plan
 
-**Status:** working draft (rev. 3 — workflow-integration pass) · derived from `_docs/archive/rough-outline.md` + product/owner briefs + `recipe-catalog-annotated.md` (rev. 2 + Maryna's 21.07 review) + `_docs/desired-workflow.md`
+**Status:** working draft (rev. 3 — workflow-integration pass) · derived from `_docs/archive/rough-outline.md` + product/owner briefs + `recipe-catalog-annotated.md` (rev. 2 + Maryna's 21.07 review) + `_docs/archive/desired-workflow.md`
 **Scope:** summer pilot vertical slice (Prozorro + YouControl, procurement case — entity/role/period set in case config)
 
 **rev. 3 changes (all previously-open catalog decisions now closed here):** row grain → **tender lot** (§16 #3) · `NotApplicable` added as 8th cell status (§5, §16 #9) · **typed list cells + the expansion gate**, with two expand modes, inline and new-table (§2a, §16 #2) · dead-end lock now fires on **any required** input (§3, §6) · five recipes added: Structured Extract promoted + fully specced, Formula/Compute, Start router, Expand, Pair builder (§6) · UI **Ukrainian only** for pilot, Translation recipe dropped from P0 (§6).
-**This is the technical contract.** Every `§N` reference in `TASKS.md` and the other docs points here. Who-does-what-when lives in `_docs/TASKS.md`; read-order and git rules in `CLAUDE.md`.
+**This is the technical contract.** Every `§N` reference in the task files and the other docs points here — use `_docs/architecture-index.md` to read only the sections you need. Who-does-what-when lives in `_docs/TASKS.md` (gates, rules) + `_docs/tasks/role-<N>.md` (the per-role lists); read-order and git rules in `CLAUDE.md`.
 
 ---
 
@@ -162,7 +162,7 @@ Recipe {
 Rules:
 - **Inputs are `required` or `optional`, declared in the recipe.** This is not documentation — it drives the dead-end lock (§6): a recipe whose *any* required input is terminal-empty is guaranteed `InsufficientData`, so it is never dispatched and never spends. Optional inputs missing → the recipe still runs, degraded. (Example: Classify/Score reads `@amount` required, `@media_mentions` optional.)
 - **Each input also declares `whole_list` or `per_item`.** This is what the §2a expansion gate reads. `per_item` pointed at a list column is rejected at edge-add — the recipe is telling the engine it needs one row per value, and the engine's answer is "then expand it first." Recipes that fold, compare, count, or merely read a list as context declare `whole_list` and are unaffected. See the per-recipe table in §6.
-- **Params may ship presets.** A preset is a named param default bundled per case type (e.g. the Score rubric "procurement v0" of `_docs/desired-workflow.md` §3) — **visible and editable by the journalist before the run**, and recorded in `column.params_jsonb` so the run log shows the rubric actually used. A preset is never a hardcode: no recipe reads a rubric the user cannot see and change.
+- **Params may ship presets.** A preset is a named param default bundled per case type (e.g. the Score rubric "procurement v0" of `_docs/archive/desired-workflow.md` §3) — **visible and editable by the journalist before the run**, and recorded in `column.params_jsonb` so the run log shows the rubric actually used. A preset is never a hardcode: no recipe reads a rubric the user cannot see and change.
 - **Engine is N→M from day 1** (data model). First shipped *recipe* may be 1→1 (scope ramp). Don't confuse the two — one is permanent, one is temporary.
 - A recipe never reaches outside `row_context`. The framework **assembles** the context and hands it in, so isolation is structural, not a coding convention.
 - `func` = deterministic (API extract, counts, pattern match). `agent` = tool-using LLM loop. Same signature, same eval, same logging.
