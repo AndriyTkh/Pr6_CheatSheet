@@ -131,7 +131,7 @@ Mandate: the schema is already locked (`_docs/migrations/0001_core_schema.sql`, 
   - Reference: §4 "Staleness," §5, §2a.
 
 - **Task: API routes for grid consumption — sheets included**
-  - **Status:** `TODO`
+  - **Status:** `REVIEW` role-2/wk2-api-routes
   - **Target date:** `2026-08-02`
   - Description: `api/routes/` — cases, **sheets**, rows, columns, cells, recipes, runs, documents. A case now has ≥1 sheet (§2a) — routes must scope rows/columns/cells by `sheet_id`, not assume one grid per case. This is the interface Role 5 builds the frontend against — get the shape stable and share it (OpenAPI schema, per tech-stack-decision.md's FE-type-generation plan) early.
   - Inputs: models.
