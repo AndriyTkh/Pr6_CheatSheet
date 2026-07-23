@@ -111,7 +111,7 @@ Mandate: the schema is already locked (`_docs/migrations/0001_core_schema.sql`, 
   - Reference: §4 step 7.
 
 - **Task: Reconcile-on-reconnect endpoint**
-  - **Status:** `TODO`
+  - **Status:** `REVIEW` role-2/wk2-reconcile
   - **Target date:** `2026-08-01`
   - Description: `GET /case/:id/cells?since=<version>` — monotonic `cell.version` lets a reconnecting client catch up before resuming the live stream.
   - Inputs: SSE task.
