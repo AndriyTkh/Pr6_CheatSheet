@@ -91,7 +91,7 @@ Mandate: the schema is already locked (`_docs/migrations/0001_core_schema.sql`, 
   - Reference: §4, §15.
 
 - **Task: Wavefront-gated enqueue + `cache_key` (depth-aware)**
-  - **Status:** `TODO`
+  - **Status:** `REVIEW` role-2/wk2-wavefront
   - **Target date:** `2026-07-30`
   - Description: Implement §4 step 5 (blocked → enqueue on `LISTEN/NOTIFY` when inputs go terminal, **scoped to rows at the column's `target_depth`** so an inline-expanded sheet's two grains never cross, §2a) and step 6 (`cache_key = hash(recipe_version + input_hashes + params + model_id + output_slot)`, force-refresh/cache-bust path for volatile recipes).
   - Inputs: Procrastinate wiring.
