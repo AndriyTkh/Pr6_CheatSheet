@@ -55,6 +55,34 @@ async def ensure_registered(
     return row
 
 
+def catalog() -> dict[tuple[uuid.UUID, int], type[Recipe]]:
+    """`(recipe_uuid, version)` → the Python class, for every *imported* recipe.
+
+    Walked from `Recipe.__subclasses__()` rather than kept in a hand-maintained
+    list: adding a recipe should not mean remembering to edit this file. The
+    shape base classes mark themselves `__abstract__` and are skipped.
+    """
+    found: dict[tuple[uuid.UUID, int], type[Recipe]] = {}
+
+    def walk(cls: type[Recipe]) -> None:
+        for sub in cls.__subclasses__():
+            if not sub.__dict__.get("__abstract__", False) and hasattr(sub, "id"):
+                found[(recipe_uuid(sub.id), sub.version)] = sub
+            walk(sub)
+
+    walk(Recipe)
+    return found
+
+
+def recipe_class(recipe_id: uuid.UUID, version: int) -> type[Recipe] | None:
+    """The class a `column.recipe_id`/`recipe_version` pair points at.
+
+    Returns None when nothing has imported that recipe — the caller turns that
+    into a cell `Error` rather than crashing a worker (§4 step 7).
+    """
+    return catalog().get((recipe_id, version))
+
+
 async def get_registered(
     session: AsyncSession, recipe_id: str, version: int
 ) -> RecipeRow | None:
