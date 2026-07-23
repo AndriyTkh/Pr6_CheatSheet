@@ -13,6 +13,7 @@ pytest -q                           # pure tests always run
 $env:CHEATSHEET_DB_PORT = "55432"   # only if something already owns host 5432
 docker compose up -d                # local Postgres 16 + pgcrypto/vector
 python scripts/apply_migrations.py  # 0001 then 0002 against $CS_DATABASE_URL
+python scripts/apply_queue_schema.py # Procrastinate's own tables (§4) — not one of ours
 CS_TEST_DATABASE_URL=postgresql+asyncpg://cheatsheet:cheatsheet@127.0.0.1:55432/cheatsheet pytest -q
 ruff check app                      # line-length 90
 ```

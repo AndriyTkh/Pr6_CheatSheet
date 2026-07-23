@@ -12,6 +12,8 @@ dependencies = [
     "fastapi-users[sqlalchemy]",
     "httpx",                # connectors (§6a)
     "jsonschema",           # server-side output_schema enforcement (§3)
+    "procrastinate",        # the one queue — Postgres LISTEN/NOTIFY + SKIP LOCKED (§4, §15)
+    "sse-starlette",        # realtime transport (§4 step 7, §15)
 ]
 
 [project.optional-dependencies]
