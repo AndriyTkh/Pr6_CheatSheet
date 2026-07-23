@@ -101,7 +101,7 @@ Mandate: the schema is already locked (`_docs/migrations/0001_core_schema.sql`, 
   - Reference: §4 steps 5–6, §2a.
 
 - **Task: SSE streaming with batched flush**
-  - **Status:** `TODO`
+  - **Status:** `REVIEW` role-2/wk2-sse
   - **Target date:** `2026-07-31`
   - Description: `realtime/` — stream cell updates to the frontend, coalesced (every 150–250ms or N cells, not one message per cell) to avoid re-render storms at pilot scale (~10-15k cells/case).
   - Inputs: wavefront enqueue producing terminal cells.
@@ -141,7 +141,7 @@ Mandate: the schema is already locked (`_docs/migrations/0001_core_schema.sql`, 
   - Reference: §15 tech-stack-decision.md "Shared FE/BE types", §2a.
 
 - **Task: Column-dependency support for derived-column inputs**
-  - **Status:** `TODO`
+  - **Status:** `WIP` role-2/wk2-chained-columns
   - **Target date:** `2026-08-03`
   - Description: Recipes must accept already-derived columns as inputs (Summarize/Classify built on top of Web Search output, etc.) — confirm DAG/cache-key handle chained derivation correctly.
   - Inputs: DAG/cache work above.
