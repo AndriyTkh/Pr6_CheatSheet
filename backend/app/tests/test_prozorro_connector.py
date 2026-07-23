@@ -5,7 +5,9 @@ All pure extraction over a recorded payload shape: no network, no LLM.
 
 import uuid
 
-from app.connectors.prozorro import extract_lot_rows
+import httpx
+
+from app.connectors.prozorro import ProzorroClient, extract_lot_rows
 from app.models.enums import CellStatus
 from app.recipes.row_producing.prozorro_lots import (
     SLOT_PARTICIPANTS,
@@ -141,3 +143,46 @@ async def test_recipe_pulls_lots_through_a_stubbed_client():
     )
     assert [r.provenance["lotID"] for r in rows] == ["lot-1", "lot-2"]
     assert all(r.depth == 0 for r in rows)
+
+
+# =====================================================================
+# Feed cursor — mocked transport, no network
+# =====================================================================
+
+
+def _feed_transport(seen: list[httpx.URL]) -> httpx.MockTransport:
+    pages = [
+        {"data": [{"id": "t1"}], "next_page": {"offset": "cursor-2"}},
+        {"data": [], "next_page": {"offset": "cursor-3"}},
+    ]
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        seen.append(request.url)
+        return httpx.Response(200, json=pages[len(seen) - 1])
+
+    return httpx.MockTransport(handler)
+
+
+async def test_feed_walks_the_cursor_and_stops_on_an_empty_page():
+    seen: list[httpx.URL] = []
+    http = httpx.AsyncClient(transport=_feed_transport(seen))
+    client = ProzorroClient(client=http)
+
+    batches = [batch async for batch, _ in client.feed(limit=1)]
+
+    assert batches == [[{"id": "t1"}], []]
+    # Page 2 resumed from page 1's cursor, and the ascending feed asks for no
+    # ordering param at all — that's the sync-by-dateModified default (§6a).
+    assert seen[1].params["offset"] == "cursor-2"
+    assert "descending" not in seen[0].params
+
+
+async def test_feed_descending_asks_the_api_for_newest_first():
+    seen: list[httpx.URL] = []
+    http = httpx.AsyncClient(transport=_feed_transport(seen))
+    client = ProzorroClient(client=http)
+
+    async for _batch, _offset in client.feed(limit=1, descending=True):
+        break
+
+    assert seen[0].params["descending"] == "1"

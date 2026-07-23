@@ -145,16 +145,25 @@ class ProzorroClient:
         return response.json()
 
     async def feed(
-        self, offset: str | None = None, limit: int = FEED_BATCH
+        self,
+        offset: str | None = None,
+        limit: int = FEED_BATCH,
+        descending: bool = False,
     ) -> AsyncIterator[tuple[list[dict], str | None]]:
         """`GET /tenders` — sync-by-`dateModified`, cursor `next_page.offset` (§6a).
 
         Yields `(batch, next_offset)`. Stops when a page comes back empty; the
         caller persists `next_offset` and resumes from it on the next poll
         (~5 min), so a restart never re-walks the whole feed.
+
+        `descending` walks newest-first instead. Not for syncing — resuming a
+        descending cursor would miss everything published while you were away —
+        but it is how you reach today's tenders without replaying 2015.
         """
         while True:
             params: dict[str, Any] = {"limit": limit}
+            if descending:
+                params["descending"] = 1
             if offset:
                 params["offset"] = offset
             payload = await self._get("/tenders", params)
