@@ -10,11 +10,19 @@ Tasks: `_docs/tasks/role-2.md` (engine/API/schema) and `_docs/tasks/role-3-4.md`
 cd backend
 .venv/Scripts/Activate.ps1          # PowerShell; source .venv/bin/activate on POSIX
 pytest -q                           # pure tests always run
-docker compose up -d                # local Postgres 15 + pgcrypto/vector
-python scripts/apply_migrations.py  # 0001 then 0002 against $DATABASE_URL
-CS_TEST_DATABASE_URL=postgresql+asyncpg://cheatsheet:cheatsheet@localhost/cheatsheet pytest -q
+$env:CHEATSHEET_DB_PORT = "55432"   # only if something already owns host 5432
+docker compose up -d                # local Postgres 16 + pgcrypto/vector
+python scripts/apply_migrations.py  # 0001 then 0002 against $CS_DATABASE_URL
+CS_TEST_DATABASE_URL=postgresql+asyncpg://cheatsheet:cheatsheet@127.0.0.1:55432/cheatsheet pytest -q
 ruff check app                      # line-length 90
 ```
+
+Two host-specific things that cost a session each if you get them wrong:
+
+- **`127.0.0.1`, never `localhost`.** `localhost` resolves `::1` first and Docker's IPv6 publish black-holes the connect for ~21s before falling back — the suite looks hung, not broken.
+- **`CHEATSHEET_DB_PORT`** shifts only the *host* side of the publish (`${CHEATSHEET_DB_PORT:-5432}:5432`). Use it when a native Postgres already owns 5432 rather than stopping that service; the container port never moves, so only the URL changes.
+
+Pipe long runs to a file (`pytest -q > out.txt`), don't `| tail` — tail buffers to EOF, so you watch a blank screen for the whole run.
 
 DB-backed tests **skip silently** without `CS_TEST_DATABASE_URL`. A skipped test is not a passed test — set the URL before claiming a DB task verified (`_docs/TASKS.md` "Verify").
 

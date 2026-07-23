@@ -6,6 +6,17 @@
 #
 #   docker compose up -d
 #   python scripts/apply_migrations.py
+#
+# Host port defaults to 5432. If a native Postgres already owns it, publish
+# elsewhere instead of stopping that service — the container port never moves,
+# so only the host side of the URL changes:
+#
+#   $env:CHEATSHEET_DB_PORT = "55432"   # PowerShell; export on POSIX
+#   docker compose up -d
+#   CS_DATABASE_URL=postgresql+asyncpg://cheatsheet:cheatsheet@127.0.0.1:55432/cheatsheet
+#
+# Use 127.0.0.1, not localhost: localhost resolves ::1 first, and Docker's IPv6
+# publish black-holes the connect for ~21s before falling back to IPv4.
 services:
   db:
     image: pgvector/pgvector:pg16
@@ -14,7 +25,7 @@ services:
       POSTGRES_PASSWORD: cheatsheet
       POSTGRES_DB: cheatsheet
     ports:
-      - "5432:5432"
+      - "${CHEATSHEET_DB_PORT:-5432}:5432"
     volumes:
       - cheatsheet_pgdata:/var/lib/postgresql/data
     healthcheck:
