@@ -41,12 +41,13 @@ class Row(Base):
     depth: Mapped[int] = mapped_column(SmallInteger, nullable=False, default=0)
     ordinal: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
     position: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    # GENERATED ALWAYS columns — Postgres computes these from provenance_jsonb
     tender_id: Mapped[Optional[str]] = mapped_column(
-        Text, nullable=True
-    )  # GENERATED ALWAYS
+        Text, nullable=True, insert=False, update=False
+    )
     lot_id: Mapped[Optional[str]] = mapped_column(
-        Text, nullable=True
-    )  # GENERATED ALWAYS
+        Text, nullable=True, insert=False, update=False
+    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now()
     )

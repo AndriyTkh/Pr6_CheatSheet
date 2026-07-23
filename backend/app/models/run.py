@@ -7,7 +7,7 @@ from decimal import Decimal
 from sqlalchemy import (
     Boolean,
     DateTime,
-    ForeignKey,
+    ForeignKeyConstraint,
     Integer,
     Numeric,
     String,
@@ -41,4 +41,11 @@ class Run(Base):
     status: Mapped[str] = mapped_column(String, nullable=False, default="ok")
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
+
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["recipe_id", "recipe_version"],
+            ["recipe.id", "recipe.version"],
+        ),
     )
