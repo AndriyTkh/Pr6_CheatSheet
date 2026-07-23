@@ -121,7 +121,7 @@ Mandate: the schema is already locked (`_docs/migrations/0001_core_schema.sql`, 
   - Reference: §4 step 7.
 
 - **Task: Staleness walk on column edit**
-  - **Status:** `TODO`
+  - **Status:** `WIP` role-2/wk2-staleness
   - **Target date:** `2026-08-01`
   - Description: The recursive CTE in §4 — mark downstream columns `stale` when an upstream one changes. Never auto-rerun; surface "new version available" for user confirm. Confirm the walk correctly crosses a sheet boundary when the upstream column feeds an Expand/Pair-builder recipe (§2a — "the DAG spans sheets at the sheet boundary only").
   - Inputs: DAG engine.
