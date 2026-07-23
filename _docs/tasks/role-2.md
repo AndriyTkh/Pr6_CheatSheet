@@ -81,7 +81,7 @@ Mandate: the schema is already locked (`_docs/migrations/0001_core_schema.sql`, 
 ### Week 2 (2026-07-29 – 2026-08-04) — merges the original plan's weeks 2+3
 
 - **Task: Wire Procrastinate as the real job queue**
-  - **Status:** `TODO`
+  - **Status:** `REVIEW` role-2/wk2-queue
   - **Target date:** `2026-07-29`
   - Description: `tasks/` — Procrastinate app + cell-execution task, backed by Postgres `LISTEN/NOTIFY` + `SKIP LOCKED`. `cell.status` stays data/display only, never the lock target (§4's explicit warning against a hand-rolled poller fighting the real queue).
   - Inputs: DAG engine (week 1).
