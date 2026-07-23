@@ -62,6 +62,26 @@ async def test_cycle_is_rejected(session, source_sheet, make_column):
     assert "B" in exc.value.message
 
 
+async def test_multi_hop_cycle_names_the_full_walk(session, source_sheet, make_column):
+    """A → B → C exists; proposing C → A must name the whole loop, in order —
+    not just mention one column (§4 — the message is what the journalist reads)."""
+    a = await make_column("A")
+    b = await make_column("B")
+    c = await make_column("C")
+    session.add_all(
+        [
+            ColumnInput(column_id=b.id, input_column_id=a.id),
+            ColumnInput(column_id=c.id, input_column_id=b.id),
+        ]
+    )
+    await session.flush()
+
+    with pytest.raises(CycleRejected) as exc:
+        await _validate(session, source_sheet, a.id, [ProposedEdge(c.id)])
+    assert exc.value.cycle_names == ["A", "B", "C", "A"]
+    assert exc.value.message == "Ця колонка створила б цикл: A → B → C → A"
+
+
 async def test_self_edge_is_rejected(session, source_sheet, make_column):
     a = await make_column("A")
     with pytest.raises(CycleRejected):

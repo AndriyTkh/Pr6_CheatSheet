@@ -4,6 +4,7 @@ import uuid
 
 import pytest
 
+from app.dag.errors import CycleRejected
 from app.dag.graph import closes_cycle, downstream, topo_sort, upstream
 
 A, B, C, D = (uuid.uuid4() for _ in range(4))
@@ -15,6 +16,21 @@ def test_new_edge_that_closes_a_loop_is_detected():
     cycle = closes_cycle(edges, (C, A))
     assert cycle is not None
     assert cycle[0] == A and cycle[-1] == A
+
+
+def test_multi_hop_cycle_names_the_full_path_in_order():
+    # A → B → C exists; proposing C → A must report A → B → C → A, not just
+    # "a cycle exists" — the journalist-readable message names the walk (§4).
+    edges = [(A, B), (B, C)]
+    cycle = closes_cycle(edges, (C, A))
+    assert cycle == [A, B, C, A]
+
+
+def test_cycle_rejected_renders_the_names_in_walk_order():
+    # errors.py joins cycle_names verbatim — order in must be order out.
+    rejected = CycleRejected(["A", "B", "C", "A"])
+    assert rejected.message == "Ця колонка створила б цикл: A → B → C → A"
+    assert rejected.cycle_names == ["A", "B", "C", "A"]
 
 
 def test_self_edge_is_a_cycle():

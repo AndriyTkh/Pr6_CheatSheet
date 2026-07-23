@@ -108,6 +108,17 @@ async def validate_new_column(
     for edge in proposed:
         cycle = closes_cycle(existing, (edge.input_column_id, new_column_id))
         if cycle is not None:
+            # `names` only knows the directly-proposed inputs; a multi-hop
+            # cycle walks through other columns too — fetch those so the
+            # message never falls back to a raw uuid (§6 journalist-readable).
+            unresolved = [n for n in cycle if n not in names]
+            if unresolved:
+                extra = (
+                    (await session.execute(select(Column).where(Column.id.in_(unresolved))))
+                    .scalars()
+                    .all()
+                )
+                names.update({c.id: c.name for c in extra})
             raise CycleRejected([names.get(n, str(n)) for n in cycle])
         existing.append((edge.input_column_id, new_column_id))
 

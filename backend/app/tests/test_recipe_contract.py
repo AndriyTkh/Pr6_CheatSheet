@@ -126,6 +126,50 @@ def test_duplicate_output_slots_are_a_declaration_error():
                 return []
 
 
+class Bounded(Echo):
+    id: ClassVar[str] = "bounded"
+    name: ClassVar[str] = "Bounded"
+    params_schema: ClassVar[Mapping[str, Any]] = {
+        "type": "object",
+        "properties": {"n": {"type": "integer", "minimum": 0}},
+        "required": ["n"],
+        "additionalProperties": False,
+    }
+
+
+def test_validate_params_accepts_a_conforming_payload():
+    Bounded.validate_params({"n": 3})  # no raise
+
+
+def test_validate_params_rejects_a_missing_required_field():
+    with pytest.raises(RecipeError):
+        Bounded.validate_params({})
+
+
+def test_validate_params_rejects_the_wrong_type():
+    with pytest.raises(RecipeError):
+        Bounded.validate_params({"n": "three"})
+
+
+async def test_run_rejects_bad_params_before_exec_is_called():
+    # dispatched (input present) but params fail the schema — exec() must not run.
+    called = False
+
+    class Spy(Bounded):
+        id: ClassVar[str] = "spy"
+        name: ClassVar[str] = "Spy"
+
+        async def exec(self, row_context, params):
+            nonlocal called
+            called = True
+            return await super().exec(row_context, params)
+
+    context = ctx(src=InputCell("src", "x", CellStatus.Answered))
+    with pytest.raises(RecipeError):
+        await Spy().run(context, {"n": -1})
+    assert called is False
+
+
 def test_item_type_on_a_non_list_output_is_rejected():
     with pytest.raises(RecipeError):
 
