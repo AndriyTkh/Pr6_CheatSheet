@@ -328,6 +328,53 @@ stays pinned to the exact version that produced its results.
 
 ---
 
+## Realtime
+
+`§4 step 7` — the live grid channel and its reconnect catch-up. Note the path
+segment is singular `/case/{case_id}` (not `/cases/`) and these are **case**-scoped,
+not sheet-scoped: one run's wavefront fills cells across a case's sheets, and the
+grid subscribes once per case. Neither route paginates.
+
+| Method | Path | Summary |
+|---|---|---|
+| GET | `/case/{case_id}/stream` | SSE stream of coalesced cell updates → `text/event-stream` |
+| GET | `/case/{case_id}/cells` | Reconnect catch-up: terminal cells past `since` → JSON |
+
+**`GET /case/{case_id}/stream`** — one Server-Sent Events connection. Emits **one
+`cells` event per flush window**, never one per cell (a wavefront turns thousands of
+cells terminal in a burst). A comment ping every 15s keeps proxies from reaping an
+idle connection.
+
+```
+event: cells
+id: <max cell.version in this batch>
+data: {"updates": [{"row_id","column_id","version","status"}, ...], "max_version": <int>}
+```
+
+`id:` is the batch high-water `cell.version`. The browser resends it as
+`Last-Event-ID` on reconnect; that value is the `since` cursor for the catch-up route
+below.
+
+**`GET /case/{case_id}/cells`** — query: `since` (int ≥0, default 0 — the last
+`cell.version` the client saw). Returns terminal cells in the case past `since`,
+ordered by version. Called once on reconnect to replay anything the stream dropped
+during the disconnect, then the client resumes the stream. Every `version` is
+monotonic (`cell_version_seq`), so nothing that filled while disconnected is lost.
+
+```json
+{
+  "since": <int>,
+  "max_version": <int>,
+  "updates": [ { "row_id": "...", "column_id": "...", "version": <int>, "status": "...", "...": "..." }, ... ]
+}
+```
+
+`max_version` is the new cursor the client carries into the resumed stream — the
+highest version returned, or `since` unchanged on an empty catch-up (the cursor never
+goes backwards).
+
+---
+
 ## Not yet in the API (as of this doc)
 
 Write/mutation routes (create case, add column, edit cell, trigger run, upload
